@@ -2,8 +2,6 @@
 title: 90s Mixtape
 ---
 
-# 90s Mixtape
-
 - I wish (Skee-Lo)
 - This Is How We Do It (Montell Jordan)
 - Everlong (Foo Fighters)
