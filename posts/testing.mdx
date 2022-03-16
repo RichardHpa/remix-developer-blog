@@ -1,0 +1,168 @@
+---
+title: AHA Testing 💡
+date: 2019-04-07
+description: How to apply the "Avoid Hasty Abstraction" principle to your test code.
+categories:
+  - testing
+meta:
+  keywords:
+    - testing
+    - react
+    - dry
+    - wet
+    - aha
+bannerCloudinaryId: unsplash/photo-1522424427542-e6fc86ff5253
+bannerCredit: Photo by [Alexandru Goman](https://unsplash.com/photos/CM-qccHaQ04)
+---
+
+The [AHA Programming Principle](/blog/aha-programming) stands for "Avoid Hasty
+Abstraction." I have specific feelings about how this applies to writing
+maintainable tests. Most of the tests that I've seen in the wild have been
+wildly on one side of the spectrum of abstraction: ANA (Absolutely No
+Abstraction), or completely DRY (Don't Repeat Yourself). (I made up ANA just
+now).
+
+Finding a sweet spot in the middle of the spectrum of abstraction is key to
+developing maintainable tests.
+
+## ANA Testing
+
+The best example of "Absolutely No Abstraction" I've seen in testing is for
+[ExpressJS route handlers](https://expressjs.com/en/guide/routing.html). For you
+to understand what I mean when I say "ANA is bad for testing" I'm going to give
+you a typical test file and ask you to pretend you're going to maintain this
+codebase and these tests. It's important for you to understand how this route
+works. You're relieved that there are tests in place which will help you make
+sure you're not going to break something. So now you're going to use the tests
+to understand the nuances of the route handler.
+
+Try to read this test and understand the one nuance between the two of them.
+
+<callout-info class="aside">Don't spend too long on this...</callout-info>
+
+```js
+import * as blogPostController from '../blog-post';
+
+// load the application-wide mock for the database.
+// I guess that means this is AANA (Almost Absolutely No Abstraction)
+// but I didn't want to write out a whole db mock for this blog post 😅
+jest.mock('../../lib/db');
+
+test('lists blog posts for the logged in user', async () => {
+  const req = {
+    locale: {
+      source: 'default',
+      language: 'en',
+      region: 'GB',
+    },
+    user: {
+      guid: '0336397b-e29d-4b63-b94d-7e68a6fa3747',
+      isActive: false,
+      picture: 'http://placehold.it/32x32',
+      age: 30,
+      name: {
+        first: 'Francine',
+        last: 'Oconnor',
+      },
+      company: 'ACME',
+      email: 'francine.oconnor@ac.me',
+      latitude: 51.507351,
+      longitude: -0.127758,
+      favoriteFruit: 'banana',
+    },
+    body: {},
+    cookies: {},
+    query: {},
+    params: {
+      bucket: 'photography',
+    },
+    header(name) {
+      return {
+        Authorization: 'Bearer TEST_TOKEN',
+      }[name];
+    },
+  };
+  const res = {
+    clearCookie: jest.fn(),
+    cookie: jest.fn(),
+    end: jest.fn(),
+    locals: {
+      content: {},
+    },
+    json: jest.fn(),
+    send: jest.fn(),
+    sendStatus: jest.fn(),
+    set: jest.fn(),
+  };
+  const next = jest.fn();
+
+  await blogPostController.loadBlogPosts(req, res, next);
+
+  expect(res.json).toHaveBeenCalledTimes(1);
+  expect(res.json).toHaveBeenCalledWith({
+    posts: expect.arrayContaining([
+      expect.objectContaining({
+        title: 'Test Post 1',
+        subtitle: 'This is the subtitle of Test Post 1',
+        body: 'The is the body of Test Post 1',
+      }),
+    ]),
+  });
+});
+
+test('returns an empty list when there are no blog posts', async () => {
+  const req = {
+    locale: {
+      source: 'default',
+      language: 'en',
+      region: 'GB',
+    },
+    user: {
+      guid: '0336397b-e29d-4b63-b94d-7e68a6fa3747',
+      isActive: false,
+      picture: 'http://placehold.it/32x32',
+      age: 30,
+      name: {
+        first: 'Francine',
+        last: 'Oconnor',
+      },
+      company: 'ACME',
+      email: 'francine.oconnor@ac.me',
+      latitude: 31.230416,
+      longitude: 121.473701,
+      favoriteFruit: 'banana',
+    },
+    body: {},
+    cookies: {},
+    query: {},
+    params: {
+      bucket: 'photography',
+    },
+    header(name) {
+      return {
+        Authorization: 'Bearer TEST_TOKEN',
+      }[name];
+    },
+  };
+  const res = {
+    clearCookie: jest.fn(),
+    cookie: jest.fn(),
+    end: jest.fn(),
+    locals: {
+      content: {},
+    },
+    json: jest.fn(),
+    send: jest.fn(),
+    sendStatus: jest.fn(),
+    set: jest.fn(),
+  };
+  const next = jest.fn();
+
+  await blogPostController.loadBlogPosts(req, res, next);
+
+  expect(res.json).toHaveBeenCalledTimes(1);
+  expect(res.json).toHaveBeenCalledWith({
+    posts: [],
+  });
+});
+```
