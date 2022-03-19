@@ -1,5 +1,7 @@
+import { useEffect, useRef } from 'react';
 import { createContext, useContext, useState } from 'react';
 import type { Dispatch, ReactNode, SetStateAction } from 'react';
+import { useFetcher } from 'remix';
 
 enum Theme {
   DARK = 'dark',
@@ -10,8 +12,49 @@ type ThemeContextType = [Theme | null, Dispatch<SetStateAction<Theme | null>>];
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme | null>(Theme.LIGHT);
+function ThemeProvider({
+  children,
+  specifiedTheme,
+}: {
+  children: ReactNode;
+  specifiedTheme: Theme | null;
+}) {
+  const [theme, setTheme] = useState<Theme | null>(() => {
+    if (specifiedTheme) {
+      if (themes.includes(specifiedTheme)) {
+        return specifiedTheme;
+      } else {
+        return null;
+      }
+    }
+
+    if (typeof window !== 'object') {
+      return null;
+    }
+
+    return Theme.LIGHT;
+  });
+
+  const persistTheme = useFetcher();
+
+  const persistThemeRef = useRef(persistTheme);
+  useEffect(() => {
+    persistThemeRef.current = persistTheme;
+  }, [persistTheme]);
+
+  const mountRun = useRef(false);
+
+  useEffect(() => {
+    if (!mountRun.current) {
+      mountRun.current = true;
+      return;
+    }
+    if (!theme) {
+      return;
+    }
+
+    persistThemeRef.current.submit({ theme }, { action: 'action/set-theme', method: 'post' });
+  }, [theme]);
 
   return <ThemeContext.Provider value={[theme, setTheme]}>{children}</ThemeContext.Provider>;
 }
@@ -24,4 +67,10 @@ function useTheme() {
   return context;
 }
 
-export { Theme, ThemeProvider, useTheme };
+const themes: Array<Theme> = Object.values(Theme);
+
+function isTheme(value: unknown): value is Theme {
+  return typeof value === 'string' && themes.includes(value as Theme);
+}
+
+export { isTheme, Theme, ThemeProvider, useTheme };

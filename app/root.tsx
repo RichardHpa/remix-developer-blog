@@ -1,6 +1,15 @@
 import { useMemo } from 'react';
-import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration, useCatch } from 'remix';
-
+import {
+  Links,
+  LiveReload,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  useCatch,
+  useLoaderData,
+} from 'remix';
+import { getThemeSession } from './utils/theme.server';
 import {
   CssBaseline,
   ThemeProvider as MuiThemeProvider,
@@ -11,11 +20,24 @@ import { ThemeProvider, useTheme } from './utils/themeProvider';
 import { Navbar } from '~/components/Navbar';
 
 import type { PaletteMode } from '@mui/material';
-import type { LinksFunction, MetaFunction } from 'remix';
+import type { LinksFunction, MetaFunction, LoaderFunction } from 'remix';
+import type { Theme } from '~/utils/themeProvider';
+
+export type LoaderData = {
+  theme: Theme | null;
+};
 
 const getTheme = (mode: PaletteMode) => ({
   palette: {
     mode,
+    ...(mode === 'light'
+      ? {}
+      : {
+          background: {
+            default: '#111827',
+            paper: '#111827',
+          },
+        }),
   },
 });
 
@@ -29,6 +51,16 @@ export const meta: MetaFunction = () => {
     description,
     keywords: 'Remix,blog',
   };
+};
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const themeSession = await getThemeSession(request);
+
+  const data: LoaderData = {
+    theme: themeSession.getTheme(),
+  };
+
+  return data;
 };
 
 function Document({
@@ -81,8 +113,9 @@ export function App() {
 }
 
 export default function AppWithProviders() {
+  const data = useLoaderData<LoaderData>();
   return (
-    <ThemeProvider>
+    <ThemeProvider specifiedTheme={data.theme}>
       <App />
     </ThemeProvider>
   );
