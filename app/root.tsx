@@ -27,7 +27,7 @@ export type LoaderData = {
   theme: Theme | null;
 };
 
-const getTheme = (mode: PaletteMode) => ({
+export const getTheme = (mode: PaletteMode) => ({
   palette: {
     mode,
     ...(mode === 'light'

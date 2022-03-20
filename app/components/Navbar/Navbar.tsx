@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-
+import { Link } from 'remix';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -14,7 +14,12 @@ import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 
 import { Theme, useTheme } from '~/utils/themeProvider';
 
-const pages = ['Blog'];
+const pages = [
+  {
+    label: 'Blog',
+    to: '/posts',
+  },
+];
 
 export const Navbar = () => {
   const [theme, setTheme] = useTheme();
@@ -30,12 +35,13 @@ export const Navbar = () => {
           <Typography variant="h6" noWrap component="div">
             Remix Blog
           </Typography>
-
-          {pages.map(page => (
-            <Button color="inherit" key={page} sx={{ my: 2, display: 'block' }}>
-              {page}
-            </Button>
-          ))}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {pages.map(page => (
+              <Button color="inherit" key={page.label} component={Link} to={page.to}>
+                {page.label}
+              </Button>
+            ))}
+          </Box>
 
           <Box>
             <Tooltip title={theme === Theme.LIGHT ? 'Light Mode' : 'Dark Mode'}>

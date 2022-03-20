@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import Checkbox from '@mui/material/Checkbox';
 import Divider from '@mui/material/Divider';
 import Paper from '@mui/material/Paper';
@@ -8,10 +8,10 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
-
-// import CodeBlock from './CodeBlock';
+import Link from '@mui/material/Link';
 
 const components = {
+  a: Link,
   p: Typography,
   h1: (() => {
     const H1 = (props: any) => <Typography {...props} component="h1" variant="h1" />;
@@ -79,8 +79,10 @@ const components = {
     const THead = (props: any) => <TableHead {...props} />;
     return memo(THead);
   })(),
-  // code: CodeBlock,
-  hr: Divider,
+  hr: () => {
+    const Hr = (props: any) => <Divider {...props} />;
+    return memo(Hr);
+  },
   input: (() => {
     const Input = (props: any) => {
       const { type } = props;

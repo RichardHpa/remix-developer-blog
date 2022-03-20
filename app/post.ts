@@ -4,7 +4,6 @@ import parseFrontMatter from 'front-matter';
 import invariant from 'tiny-invariant';
 import { marked } from 'marked';
 import { bundleMDX } from '~/utils/mdx.server';
-import { Button } from '@mui/material';
 
 export type Post = {
   slug: string;
