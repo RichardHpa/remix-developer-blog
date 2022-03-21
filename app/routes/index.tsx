@@ -1,8 +1,13 @@
 import { Link } from 'remix';
+import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
+
 export default function Index() {
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', lineHeight: '1.4' }}>
-      <Link to="/posts">Posts</Link>
-    </div>
+    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <Button component={Link} to="/posts">
+        View all Posts
+      </Button>
+    </Box>
   );
 }

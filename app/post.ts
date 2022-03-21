@@ -8,10 +8,12 @@ import { bundleMDX } from '~/utils/mdx.server';
 export type Post = {
   slug: string;
   title: string;
+  description: string;
 };
 
 export type PostMarkdownAttributes = {
   title: string;
+  description: string;
 };
 
 function isValidPostAttributes(attributes: any): attributes is PostMarkdownAttributes {
@@ -36,6 +38,7 @@ export async function getPosts() {
       return {
         slug: filename.replace(/\.mdx$/, ''),
         title: attributes.title,
+        description: attributes.description,
       };
     })
   );
